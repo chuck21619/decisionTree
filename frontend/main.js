@@ -9,8 +9,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     originalTitle = document.getElementById('title').innerHTML;
     try {
         document.getElementById('title').innerHTML = "Loading Players and Decks...";
+        console.log(`${API_BASE_URL}/options`);
         const response = await fetch(`${API_BASE_URL}/options`);
         const data = await response.json();
+        console.log(data);
 
         const playerIds = ["player1", "player2", "player3", "player4"];
         const deckIds = ["deck1", "deck2", "deck3", "deck4"];
@@ -50,6 +52,7 @@ document.getElementById("predictButton").addEventListener("click", async () => {
     }
 
     try {
+        console.log(`${API_BASE_URL}/predict`);
         const response = await fetch(`${API_BASE_URL}/predict`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -57,6 +60,7 @@ document.getElementById("predictButton").addEventListener("click", async () => {
         });
         document.getElementById('title').innerHTML = "Predicting...";
         const result = await response.json();
+        console.log(result);
         document.getElementById('title').innerHTML = originalTitle;
         alert(`Predicted winner: ${result.winner}`);
     } catch (error) {

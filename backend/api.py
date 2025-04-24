@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
-from prediction import predict_winner
-from preprocessing import encode_data
-from model import train_model
-from data_generation import generate_dataset
-from data_generation import get_unique_players_and_decks
+from backend.prediction import predict_winner
+from backend.preprocessing import encode_data
+from backend.model import train_model
+from backend.data_generation import generate_dataset
+from backend.data_generation import get_unique_players_and_decks
 
 # Step 1: Load + train model on startup
 df = generate_dataset()

@@ -1,29 +1,60 @@
-// main.js
+var originalTitle = "";
 document.addEventListener("DOMContentLoaded", async () => {
+    originalTitle = document.getElementById('title').innerHTML;
     try {
-      const response = await fetch("https://decisiontree-api-p1eo.onrender.com/options");
-      const data = await response.json();
-  
-      const playerIds = ["player1", "player2", "player3", "player4"];
-      const deckIds = ["deck1", "deck2", "deck3", "deck4"];
-  
-      playerIds.forEach(id => populateDropdown(id, data.players));
-      deckIds.forEach(id => populateDropdown(id, data.decks));
-  
-      // Show prediction section once everything is loaded
-      document.getElementById("predictionSection").style.display = "block";
+        document.getElementById('title').innerHTML = "Loading Players and Decks...";
+        const response = await fetch("https://decisiontree-api-p1eo.onrender.com/options");
+        const data = await response.json();
+
+        const playerIds = ["player1", "player2", "player3", "player4"];
+        const deckIds = ["deck1", "deck2", "deck3", "deck4"];
+
+        playerIds.forEach(id => populateDropdown(id, data.players));
+        deckIds.forEach(id => populateDropdown(id, data.decks));
+
+        // Show prediction section once everything is loaded
+        document.getElementById("predictionSection").style.display = "block";
+        document.getElementById('title').innerHTML = originalTitle;
+
     } catch (error) {
-      console.error("Error loading options:", error);
+        console.error("Error loading options:", error);
     }
-  });
-  
-  function populateDropdown(selectId, options) {
+});
+
+function populateDropdown(selectId, options) {
     const select = document.getElementById(selectId);
     options.forEach(option => {
-      const opt = document.createElement("option");
-      opt.value = option;
-      opt.textContent = option;
-      select.appendChild(opt);
+        const opt = document.createElement("option");
+        opt.value = option;
+        opt.textContent = option;
+        select.appendChild(opt);
     });
-  }
-  
+}
+
+document.getElementById("predictButton").addEventListener("click", async () => {
+    const players = {};
+
+    for (let i = 1; i <= 4; i++) {
+        const player = document.getElementById(`player${i}`).value;
+        const deck = document.getElementById(`deck${i}`).value;
+
+        if (player && deck) {
+            players[player] = deck;
+        }
+    }
+
+    try {
+        const response = await fetch("https://decisiontree-api-p1eo.onrender.com/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ players })
+        });
+        document.getElementById('title').innerHTML = "Predicting...";
+        const result = await response.json();
+        document.getElementById('title').innerHTML = originalTitle;
+        alert(`Predicted winner: ${result.winner}`);
+    } catch (error) {
+        console.error("Prediction failed:", error);
+        alert("Something went wrong with prediction.");
+    }
+});

@@ -19,8 +19,12 @@ def generate_dataset():
     return build_dataset_from_sheet(raw_data)
 
 def get_unique_players_and_decks():
-    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRUFTglCikRQC5C1GVZal97MJBGYBP9ZDoMeYDnhtI8JRAH2Q_oZKudRWoxp7wqMCZh9GyMJhReJ3QG/pub?gid=0&single=true&output=csv"
-    df = pd.read_csv(url)
+    df = pd.read_csv(CSV_URL)
     player_names = list(df.columns.drop("winner"))
-    deck_names = pd.unique(df.drop(columns="winner").values.ravel())
+    
+    # Flatten, drop NaNs, convert all to str before sorting
+    deck_values = df.drop(columns="winner").values.ravel()
+    deck_names = pd.unique([str(d) for d in deck_values if pd.notna(d)])
+
     return sorted(player_names), sorted(deck_names)
+

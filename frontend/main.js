@@ -1,9 +1,15 @@
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+const API_BASE_URL = isLocal
+  ? "http://localhost:10000"
+  : "https://decisiontree-api-p1eo.onrender.com"; // Replace with your actual deployed API URL
+
 var originalTitle = "";
 document.addEventListener("DOMContentLoaded", async () => {
     originalTitle = document.getElementById('title').innerHTML;
     try {
         document.getElementById('title').innerHTML = "Loading Players and Decks...";
-        const response = await fetch("https://decisiontree-api-p1eo.onrender.com/options");
+        const response = await fetch(`${API_BASE_URL}/options`);
         const data = await response.json();
 
         const playerIds = ["player1", "player2", "player3", "player4"];
@@ -44,7 +50,7 @@ document.getElementById("predictButton").addEventListener("click", async () => {
     }
 
     try {
-        const response = await fetch("https://decisiontree-api-p1eo.onrender.com/predict", {
+        const response = await fetch(`${API_BASE_URL}/predict`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ players })

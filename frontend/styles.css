@@ -1,0 +1,18 @@
+body {
+    color: rgb(243, 243, 243);
+    background-color:rgb(40, 114, 123);
+    font-family: Arial, sans-serif;
+}
+button {
+    width: 50px;
+}
+#predictions {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#predictions th, #predictions td {
+    padding: 1px;
+    text-align: left;
+    border: 1px solid rgb(255, 255, 255);
+}

@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from backend.prediction import predict_winner
@@ -13,7 +14,13 @@ model, _, X = train_model(df, player_columns, le_players)
 
 # Step 2: Set up FastAPI
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace "*" with my frontend domain for more security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Step 3: Define input format
 class GameInput(BaseModel):
     players: dict

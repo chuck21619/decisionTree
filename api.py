@@ -4,6 +4,7 @@ from prediction import predict_winner
 from preprocessing import encode_data
 from model import train_model
 from data_generation import generate_dataset
+from data_generation import get_unique_players_and_decks
 
 # Step 1: Load + train model on startup
 df = generate_dataset()
@@ -17,6 +18,18 @@ app = FastAPI()
 class GameInput(BaseModel):
     players: dict
 
+@app.get("/")
+async def root():
+    return {"message": "App is live"}
+
+@app.get("/options")
+async def get_options():
+    players, decks = get_unique_players_and_decks()
+    return {
+        "players": players,
+        "decks": decks
+    }
+
 @app.post("/predict")
 def predict(game_input: GameInput):
     result = predict_winner(
@@ -27,3 +40,4 @@ def predict(game_input: GameInput):
         le_players
     )
     return {"winner": result}
+

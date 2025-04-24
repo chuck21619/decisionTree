@@ -18,4 +18,6 @@ def predict_probabilities(game, model, X_columns, le_decks, le_players):
         df_game[col] = le_decks.transform(df_game[col])
 
     probs = model.predict_proba(df_game)
-    return {player: probs[0][i] for i, player in enumerate(le_players.classes_)}
+    
+    # Convert numpy floats to native Python float
+    return {player: float(probs[0][i]) for i, player in enumerate(le_players.classes_)}

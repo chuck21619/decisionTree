@@ -1,11 +1,10 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
-from backend.prediction import predict_winner
+from backend.prediction import predict_winner, predict_probabilities
 from backend.preprocessing import encode_data
 from backend.model import train_model
-from backend.data_generation import generate_dataset
-from backend.data_generation import get_unique_players_and_decks
+from backend.data_generation import generate_dataset, get_unique_players_and_decks
 
 # Step 1: Load + train model on startup
 df = generate_dataset()
@@ -39,12 +38,21 @@ async def get_options():
 
 @app.post("/predict")
 def predict(game_input: GameInput):
-    result = predict_winner(
+    winner = predict_winner(
         game_input.players,
         model,
         X.columns.tolist(),
         le_decks,
         le_players
     )
-    return {"winner": result}
-
+    probabilities = predict_probabilities(
+        game_input.players,
+        model,
+        X.columns.tolist(),
+        le_decks,
+        le_players
+    )
+    return {
+        "winner": winner,
+        "probabilities": probabilities
+    }

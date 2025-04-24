@@ -1,8 +1,8 @@
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 const API_BASE_URL = isLocal
-  ? "http://localhost:10000"
-  : "https://decisiontree-api-p1eo.onrender.com"; // Replace with your actual deployed API URL
+    ? "http://localhost:10000"
+    : "https://decisiontree-api-p1eo.onrender.com"; // Replace with your actual deployed API URL
 
 var originalTitle = "";
 document.addEventListener("DOMContentLoaded", async () => {
@@ -58,11 +58,20 @@ document.getElementById("predictButton").addEventListener("click", async () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ players })
         });
+
         document.getElementById('title').innerHTML = "Predicting...";
         const result = await response.json();
         console.log(result);
         document.getElementById('title').innerHTML = originalTitle;
-        alert(`Predicted winner: ${result.winner}`);
+
+        // Build probability display string
+        let probabilityMsg = "";
+        for (const [player, prob] of Object.entries(result.probabilities)) {
+            probabilityMsg += `${player}: ${(prob * 100).toFixed(1)}%\n`;
+        }
+
+        alert(`Predicted winner: ${result.winner}\n\nWin probabilities:\n${probabilityMsg}`);
+
     } catch (error) {
         console.error("Prediction failed:", error);
         alert("Something went wrong with prediction.");

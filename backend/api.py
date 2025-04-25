@@ -38,21 +38,33 @@ async def get_options():
 
 @app.post("/predict")
 def predict(game_input: GameInput):
-    winner = predict_winner(
+    raw_probabilities = predict_probabilities(
         game_input.players,
         model,
         X.columns.tolist(),
         le_decks,
         le_players
     )
-    probabilities = predict_probabilities(
-        game_input.players,
-        model,
-        X.columns.tolist(),
-        le_decks,
-        le_players
+
+    input_players = game_input.players.keys()
+
+    # Build the filtered probabilities dict
+    final_probabilities = {
+        player: raw_probabilities.get(player, 0.0)
+        for player in input_players
+    }
+
+    # Sort by probability descending
+    sorted_probabilities = dict(
+        sorted(final_probabilities.items(), key=lambda x: x[1], reverse=True)
     )
+
+    # Winner is the top player
+    winner = next(iter(sorted_probabilities))
+
     return {
         "winner": winner,
-        "probabilities": probabilities
+        "probabilities": sorted_probabilities
     }
+
+

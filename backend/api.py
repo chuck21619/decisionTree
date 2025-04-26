@@ -10,12 +10,8 @@ from backend.data_generation import generate_dataset, get_unique_players_and_dec
 df = generate_dataset()
 
 # Call the function on your dataset
-encoded_players, encoded_decks, le_players, le_decks = encode_data(df)
-
-print(f"encoded_players:{encoded_players}")
-print(le_players)
-print(f"encoded_decks:{encoded_decks}")
-print(le_decks)
+X_player_train, X_deck_train, Y_targets, le_players, le_decks = encode_data(df)
+train_model(X_player_train, X_deck_train, Y_targets)
 
 # Step 2: Set up FastAPI
 app = FastAPI()

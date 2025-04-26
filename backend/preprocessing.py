@@ -1,32 +1,31 @@
+import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 def encode_data(df):
+    
     df = df.fillna('none')
 
-    player_names = list(df.columns.drop("winner"))
-    player_names.sort()
-    print(f"player_names:{player_names}")
-    
+    player_names = sorted(df.columns.drop("winner"))
+
     deck_values = df.drop(columns="winner").values.ravel()
-    deck_names = pd.unique([str(d) for d in deck_values if pd.notna(d)])
+    deck_names = pd.unique(deck_values)
     deck_names.sort()
-    print(f"deck_names:{deck_names}")
-    
+
     le_players = LabelEncoder()
     le_decks = LabelEncoder()
-    
-    le_players.fit(player_names)
+    le_players.fit(player_names + ['none'])  # Add 'none' to handle when a player is absent
     le_decks.fit(deck_names)
-    
-    encoded_players = df.drop(columns="winner").copy()
-    for col in encoded_players.columns:
-        player_encoded_value = le_players.transform([col])[0]
-        # Now fill: if the deck is 'none', put -1 instead of player_encoded_value
-        encoded_players[col] = df[col].apply(
-            lambda deck: player_encoded_value if deck != 'none' else -1
-        )
-        
-    encoded_decks = df.drop(columns="winner").apply(lambda col: le_decks.transform(col))
-    
-    return encoded_players, encoded_decks, le_players, le_decks
+
+    df_players = df.drop(columns="winner")
+    deck_array = df_players.values
+
+    player_array = np.tile(df_players.columns.to_numpy(), (deck_array.shape[0], 1))
+    encoded_player_array = le_players.transform(player_array.ravel()).reshape(player_array.shape)
+    none_player_code = le_players.transform(["none"])[0]
+    encoded_players = np.where(deck_array != "none", encoded_player_array, none_player_code)
+
+    encoded_decks = le_decks.transform(deck_array.ravel()).reshape(deck_array.shape)
+    encoded_winner = le_players.transform(df["winner"])
+
+    return encoded_players, encoded_decks, encoded_winner, le_players, le_decks

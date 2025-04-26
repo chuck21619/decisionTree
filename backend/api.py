@@ -6,10 +6,16 @@ from backend.preprocessing import encode_data
 from backend.model import train_model
 from backend.data_generation import generate_dataset, get_unique_players_and_decks
 
-# Step 1: Load + train model on startup
+# Step 1: Generate and encode data
 df = generate_dataset()
-df, player_columns, le_players, le_decks = encode_data(df)
-model, _, X = train_model(df, player_columns, le_players)
+
+# Call the function on your dataset
+encoded_players, encoded_decks, le_players, le_decks = encode_data(df)
+
+print(f"encoded_players:{encoded_players}")
+print(le_players)
+print(f"encoded_decks:{encoded_decks}")
+print(le_decks)
 
 # Step 2: Set up FastAPI
 app = FastAPI()

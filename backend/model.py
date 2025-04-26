@@ -1,49 +1,60 @@
-from sklearn.model_selection import GridSearchCV, train_test_split, StratifiedKFold
+import pandas as pd
 import xgboost as xgb
+from sklearn.model_selection import train_test_split
 
-def train_model(df, player_columns, le_players):
-    X = df[player_columns]
-    y = df['winner']
+def train_model(X_players, X_decks, y_encoded, le_players, le_decks):
+    # Split data (no stratify to avoid issues with small classes)
+    X_players_train, X_players_test, X_decks_train, X_decks_test, y_train, y_test = train_test_split(
+        X_players, X_decks, y_encoded, test_size=0.2, random_state=42
+    )
 
-    model = xgb.XGBClassifier(
+    # Player model
+    player_model = xgb.XGBClassifier(
+        objective='multi:softmax',
+        num_class=len(le_players.classes_),  # Total number of players, even non-winners
+        max_depth=3,
+        learning_rate=0.1,
+        n_estimators=100,
+        subsample=0.6,
+        colsample_bytree=0.6,
+        early_stopping_rounds=3
+    )
+    player_model.fit(X_players_train, y_train, eval_set=[(X_players_test, y_test)])
+
+    # Deck model
+    deck_model = xgb.XGBClassifier(
+        objective='multi:softmax',
+        num_class=len(le_decks.classes_),
+        max_depth=3,
+        learning_rate=0.1,
+        n_estimators=100,
+        subsample=0.6,
+        colsample_bytree=0.6,
+        early_stopping_rounds=3
+    )
+    deck_model.fit(X_decks_train, y_train, eval_set=[(X_decks_test, y_test)])
+
+    # Meta-model (example here as a simple average of predictions)
+    meta_model = xgb.XGBClassifier(
         objective='multi:softmax',
         num_class=len(le_players.classes_),
-        max_depth=2,
-        learning_rate=0.01,
-        n_estimators=25,
+        max_depth=3,
+        learning_rate=0.1,
+        n_estimators=100,
         subsample=0.6,
-        colsample_bytree=0.6
+        colsample_bytree=0.6,
+        early_stopping_rounds=3
     )
-    model.fit(X, y)
-    accuracy = 33
-    return model, accuracy, X
 
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    # param_grid = {
-    #     'max_depth': [2, 3, 4],
-    #     'learning_rate': [0.01, 0.1, 0.3],
-    #     'n_estimators': [25, 50, 100],
-    #     'subsample': [0.6, 0.8, 1.0],
-    #     'colsample_bytree': [0.6, 0.8, 1.0],
-    # }
-    # model = xgb.XGBClassifier(
-    #     objective='multi:softmax',
-    #     num_class=len(le_players.classes_),
-    #     eval_metric='mlogloss'
-    # )
-    # stratified_kfold = StratifiedKFold(n_splits=3)
-    # grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=stratified_kfold, scoring='accuracy', verbose=1, n_jobs=-1)
-    # grid_search.fit(X_train, y_train)
-    # best_model = grid_search.best_estimator_
-    # accuracy = best_model.score(X_test, y_test)
-    # print("Best params:", grid_search.best_params_)
-    # print("Best accuracy:", accuracy)
-    # # Log accuracy for all tested models (i.e., the grid search results)
-    # print("Grid Search Results:")
-    # for mean_score, params in zip(grid_search.cv_results_['mean_test_score'], grid_search.cv_results_['params']):
-    #     print(f"Params: {params} | Mean Test Accuracy: {mean_score}")
-    #
-    # return best_model, accuracy, X
+    # Using both models for meta-model predictions
+    player_preds = player_model.predict(X_players_test)
+    deck_preds = deck_model.predict(X_decks_test)
 
+    # Combine predictions
+    meta_X = pd.DataFrame({'player_preds': player_preds, 'deck_preds': deck_preds})
+    meta_model.fit(meta_X, y_test)
 
+    # Evaluate accuracy (simplified for now)
+    accuracy = (meta_model.score(meta_X, y_test)) * 100
 
+    return player_model, deck_model, meta_model, accuracy, X_players

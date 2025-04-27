@@ -1,11 +1,11 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
-from backend.prediction import predict_winner, predict_probabilities
-from backend.preprocessing import encode_data
-from backend.model import train_model
+from fastapi import FastAPI
+from pydantic import RootModel
+from backend.preprocessing import encode_data, encode_game_input
+from backend.model import train_model, model_predict
 from backend.data_generation import generate_dataset, get_unique_players_and_decks
 from sklearn.metrics import accuracy_score
+from typing import Dict
 
 # Step 1: Generate and encode data
 df = generate_dataset()
@@ -13,8 +13,6 @@ df = generate_dataset()
 # Call the function on your dataset
 x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks = encode_data(df)
 model, combined_features = train_model(x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks)
-
-
 
 meta_predictions = model.predict(combined_features)
 accuracy = accuracy_score(y_player, meta_predictions)
@@ -45,7 +43,6 @@ for i in range(combined_features.shape[0]):
     print(f"  True winner: {true_winner}")
     print("-" * 40)
 
-
 # Step 2: Set up FastAPI
 app = FastAPI()
 app.add_middleware(
@@ -56,8 +53,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 # Step 3: Define input format
-class GameInput(BaseModel):
-    players: dict
+class GameInput(RootModel[Dict[str, str]]):
+    pass
 
 @app.get("/")
 async def root():
@@ -73,33 +70,11 @@ async def get_options():
 
 @app.post("/predict")
 def predict(game_input: GameInput):
-    raw_probabilities = predict_probabilities(
-        game_input.players,
-        model,
-        X.columns.tolist(),
-        le_decks,
-        le_players
-    )
-
-    input_players = game_input.players.keys()
-
-    # Build the filtered probabilities dict
-    final_probabilities = {
-        player: raw_probabilities.get(player, 0.0)
-        for player in input_players
-    }
-
-    # Sort by probability descending
-    sorted_probabilities = dict(
-        sorted(final_probabilities.items(), key=lambda x: x[1], reverse=True)
-    )
-
-    # Winner is the top player
-    winner = next(iter(sorted_probabilities))
+    print("=====/predict=====")
+    print(game_input)
+    winner = model_predict(game_input)
 
     return {
-        "winner": winner,
-        "probabilities": sorted_probabilities
+        "winner": "test",
+        "somethihnjgn": "ssese"
     }
-
-

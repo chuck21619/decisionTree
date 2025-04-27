@@ -50,13 +50,14 @@ document.getElementById("predictButton").addEventListener("click", async () => {
             players[player] = deck;
         }
     }
+    console.log(JSON.stringify(players));
 
     try {
         console.log(`${API_BASE_URL}/predict`);
         const response = await fetch(`${API_BASE_URL}/predict`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ players })
+            body: JSON.stringify(players)
         });
 
         document.getElementById('title').innerHTML = "Predicting...";

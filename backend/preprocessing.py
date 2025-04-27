@@ -33,4 +33,4 @@ def encode_data(df):
     le_target_decks.fit(sorted(winner_deck_map.unique()))
     y_deck = le_target_decks.transform(winner_deck_map)
 
-    return x_player, y_player, x_deck, y_deck, le_target_players
+    return x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks

@@ -73,22 +73,19 @@ def predict(game_input: GameInput):
     print("=====/predict=====")
     print(game_input)
 
-    game_input_dict = {
-        "adnaan": "anje",
-        "austin": "aesi",
-        "brittany": "abzan tokens",
-        "dustin": "Aminatou, the Fateshifter",
-        "pk": "none",
-        "chuck": "none",
-        "jonathan": "none"
-    }
+    # game_input_dict = {
+    #     "adnaan": "anje",
+    #     "austin": "aesi",
+    #     "brittany": "abzan tokens",
+    #     "dustin": "Aminatou, the Fateshifter",
+    #     "pk": "none",
+    #     "chuck": "none",
+    #     "jonathan": "none"
+    # }
+    # game_input2 = GameInput(game_input_dict)
 
-    # Instantiate GameInput
-    game_input2 = GameInput(game_input_dict)
-
-    winner = model_predict(game_input2)
-
+    winner = model_predict(game_input)
+    print(f"WINNER: {winner}")
     return {
-        "winner": "test",
-        "somethihnjgn": "ssese"
+        "winner": winner
     }

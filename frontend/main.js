@@ -5,6 +5,8 @@ const API_BASE_URL = isLocal
     : "https://decisiontree-api-p1eo.onrender.com"; // Replace with your actual deployed API URL
 
 var originalTitle = "";
+var availablePlayers = [];  // Store available players
+
 document.addEventListener("DOMContentLoaded", async () => {
     originalTitle = document.getElementById('title').innerHTML;
     try {
@@ -13,6 +15,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const response = await fetch(`${API_BASE_URL}/options`);
         const data = await response.json();
         console.log(data);
+
+        availablePlayers = data.players; // Save available players
 
         const playerIds = ["player1", "player2", "player3", "player4"];
         const deckIds = ["deck1", "deck2", "deck3", "deck4"];
@@ -42,6 +46,7 @@ function populateDropdown(selectId, options) {
 document.getElementById("predictButton").addEventListener("click", async () => {
     const players = {};
 
+    // Gather the player-deck pairs from the dropdowns
     for (let i = 1; i <= 4; i++) {
         const player = document.getElementById(`player${i}`).value;
         const deck = document.getElementById(`deck${i}`).value;
@@ -50,7 +55,15 @@ document.getElementById("predictButton").addEventListener("click", async () => {
             players[player] = deck;
         }
     }
-    console.log(JSON.stringify(players));
+
+    // Append missing players with deck 'none'
+    availablePlayers.forEach(player => {
+        if (!players.hasOwnProperty(player)) {
+            players[player] = 'none'; // Append with 'none' deck
+        }
+    });
+
+    console.log("Updated players object:", JSON.stringify(players));
 
     try {
         console.log(`${API_BASE_URL}/predict`);
@@ -59,20 +72,18 @@ document.getElementById("predictButton").addEventListener("click", async () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(players)
         });
-
+    
         document.getElementById('title').innerHTML = "Predicting...";
         const result = await response.json();
         console.log(result);
         document.getElementById('title').innerHTML = originalTitle;
-
-        // Build probability display string
-        let probabilityMsg = "";
-        for (const [player, prob] of Object.entries(result.probabilities)) {
-            probabilityMsg += `${player}: ${(prob * 100).toFixed(1)}%\n`;
-        }
-
-        alert(`Predicted winner: ${result.winner}\n\nWin probabilities:\n${probabilityMsg}`);
-
+    
+        // Assuming result contains only 'winner' (a string)
+        const { winner } = result;
+    
+        // Display the predicted winner in the alert
+        alert(`Predicted winner: ${winner}`);
+    
     } catch (error) {
         console.error("Prediction failed:", error);
         alert("Something went wrong with prediction.");

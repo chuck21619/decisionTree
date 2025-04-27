@@ -14,6 +14,15 @@ df = generate_dataset()
 x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks = encode_data(df)
 model, combined_features = train_model(x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks)
 
+
+
+meta_predictions = model.predict(combined_features)
+accuracy = accuracy_score(y_player, meta_predictions)
+print(f"Meta-model accuracy: {accuracy}")
+meta_player_name_predictions = le_target_players.inverse_transform(meta_predictions)
+print("Meta-model player predictions:", meta_player_name_predictions)
+
+
 for i in range(combined_features.shape[0]):
     player_pred = combined_features[i, 0]
     deck_pred = combined_features[i, 1]
@@ -32,16 +41,10 @@ for i in range(combined_features.shape[0]):
     print(f"  Input decks: {input_decks}")
     print(f"  Predicted Player: {decoded_player_pred}")
     print(f"  Predicted Deck: {decoded_deck_pred}")
+    print(f"  Predicted Meta Player: {meta_player_name_predictions[i]}")
     print(f"  True winner: {true_winner}")
     print("-" * 40)
 
-
-
-meta_predictions = model.predict(combined_features)
-accuracy = accuracy_score(y_player, meta_predictions)
-print(f"Meta-model accuracy: {accuracy}")
-meta_player_name_predictions = le_target_players.inverse_transform(meta_predictions)
-print("Meta-model player predictions:", meta_player_name_predictions)
 
 # Step 2: Set up FastAPI
 app = FastAPI()

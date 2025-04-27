@@ -16,32 +16,32 @@ model, combined_features = train_model(x_player, y_player, le_input_players, le_
 
 meta_predictions = model.predict(combined_features)
 accuracy = accuracy_score(y_player, meta_predictions)
-print(f"Meta-model accuracy: {accuracy}")
 meta_player_name_predictions = le_target_players.inverse_transform(meta_predictions)
-print("Meta-model player predictions:", meta_player_name_predictions)
 
 
-# for i in range(combined_features.shape[0]):
-#     player_pred = combined_features[i, 0]
-#     deck_pred = combined_features[i, 1]
-#     decoded_player_pred = le_target_players.inverse_transform([player_pred])[0]
-#     decoded_deck_pred = le_target_decks.inverse_transform([deck_pred])[0]
+for i in range(combined_features.shape[0]):
+    player_pred = combined_features[i, 0]
+    deck_pred = combined_features[i, 1]
+    decoded_player_pred = le_target_players.inverse_transform([player_pred])[0]
+    decoded_deck_pred = le_target_decks.inverse_transform([deck_pred])[0]
 
-#     input_players = le_input_players.inverse_transform(x_player[i])
-#     input_decks = ""
-#     for k in range(7):
-#         input_decks += " " + le_input_decks.inverse_transform([x_deck[i][k]])[0]
+    input_players = le_input_players.inverse_transform(x_player[i])
+    input_decks = ""
+    for k in range(7):
+        input_decks += " " + le_input_decks.inverse_transform([x_deck[i][k]])[0]
 
-#     true_winner = le_target_players.inverse_transform([y_player[i]])[0]
+    true_winner = le_target_players.inverse_transform([y_player[i]])[0]
 
-#     print(f"Row {i}:")
-#     print(f"  Input players: {input_players}")
-#     print(f"  Input decks: {input_decks}")
-#     print(f"  Predicted Player: {decoded_player_pred}")
-#     print(f"  Predicted Deck: {decoded_deck_pred}")
-#     print(f"  Predicted Meta Player: {meta_player_name_predictions[i]}")
-#     print(f"  True winner: {true_winner}")
-#     print("-" * 40)
+    print(f"Row {i}:")
+    print(f"  Input players: {input_players}")
+    print(f"  Input decks: {input_decks}")
+    print(f"  Predicted Player: {decoded_player_pred}")
+    print(f"  Predicted Deck: {decoded_deck_pred}")
+    print(f"      Predicted Meta Player: {meta_player_name_predictions[i]}")
+    print(f"      True winner: {true_winner}")
+    print("-" * 40)
+
+print(f"Meta-model accuracy: {accuracy}")
 
 # Step 2: Set up FastAPI
 app = FastAPI()
@@ -70,22 +70,9 @@ async def get_options():
 
 @app.post("/predict")
 def predict(game_input: GameInput):
-    print("=====/predict=====")
     print(game_input)
 
-    # game_input_dict = {
-    #     "adnaan": "anje",
-    #     "austin": "aesi",
-    #     "brittany": "abzan tokens",
-    #     "dustin": "Aminatou, the Fateshifter",
-    #     "pk": "none",
-    #     "chuck": "none",
-    #     "jonathan": "none"
-    # }
-    # game_input2 = GameInput(game_input_dict)
-
     winner = model_predict(game_input)
-    print(f"WINNER: {winner}")
     return {
         "winner": winner
     }

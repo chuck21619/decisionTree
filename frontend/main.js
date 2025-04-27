@@ -63,8 +63,6 @@ document.getElementById("predictButton").addEventListener("click", async () => {
         }
     });
 
-    console.log("Updated players object:", JSON.stringify(players));
-
     try {
         console.log(`${API_BASE_URL}/predict`);
         const response = await fetch(`${API_BASE_URL}/predict`, {

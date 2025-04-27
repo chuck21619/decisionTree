@@ -5,13 +5,20 @@ from backend.prediction import predict_winner, predict_probabilities
 from backend.preprocessing import encode_data
 from backend.model import train_model
 from backend.data_generation import generate_dataset, get_unique_players_and_decks
+from sklearn.metrics import accuracy_score
 
 # Step 1: Generate and encode data
 df = generate_dataset()
 
 # Call the function on your dataset
-X_player_train, X_deck_train, Y_targets, le_players, le_decks = encode_data(df)
-train_model(X_player_train, X_deck_train, Y_targets)
+x_player, y_player, x_deck, y_deck, le_target_players = encode_data(df)
+model, combined_features = train_model(x_player, y_player, x_deck, y_deck)
+
+meta_predictions = model.predict(combined_features)
+accuracy = accuracy_score(y_player, meta_predictions)
+print(f"Meta-model accuracy: {accuracy}")
+meta_player_name_predictions = le_target_players.inverse_transform(meta_predictions)
+print("Meta-model player predictions:", meta_player_name_predictions)
 
 # Step 2: Set up FastAPI
 app = FastAPI()

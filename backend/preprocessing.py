@@ -3,29 +3,34 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 def encode_data(df):
-    
     df = df.fillna('none')
+    df_input = df.drop(columns="winner")
 
+    #player x and y
     player_names = sorted(df.columns.drop("winner"))
+    le_input_players = LabelEncoder()
+    le_input_players.fit(player_names + ['none'])
 
-    deck_values = df.drop(columns="winner").values.ravel()
-    deck_names = pd.unique(deck_values)
-    deck_names.sort()
+    player_input = np.tile(df_input.columns.to_numpy(), (df_input.shape[0], 1))
+    x_player_almost = le_input_players.transform(player_input.ravel()).reshape(player_input.shape)
+    none_player_code = le_input_players.transform(["none"])[0]
+    x_player = np.where(df_input.values != "none", x_player_almost, none_player_code)
 
-    le_players = LabelEncoder()
-    le_decks = LabelEncoder()
-    le_players.fit(player_names + ['none'])  # Add 'none' to handle when a player is absent
-    le_decks.fit(deck_names)
+    unique_winner_players = df['winner'].unique()
+    le_target_players = LabelEncoder()
+    le_target_players.fit(unique_winner_players)
+    y_player = le_target_players.transform(df["winner"])
 
-    df_players = df.drop(columns="winner")
-    deck_array = df_players.values
+    #deck x and y
+    deck_names = sorted(pd.unique(df.drop(columns="winner").values.ravel()))
+    le_input_decks = LabelEncoder()
+    le_input_decks.fit(deck_names + ['none'])
 
-    player_array = np.tile(df_players.columns.to_numpy(), (deck_array.shape[0], 1))
-    encoded_player_array = le_players.transform(player_array.ravel()).reshape(player_array.shape)
-    none_player_code = le_players.transform(["none"])[0]
-    encoded_players = np.where(deck_array != "none", encoded_player_array, none_player_code)
+    x_deck = le_input_decks.transform(df.drop(columns="winner").values.ravel()).reshape(df_input.shape)
 
-    encoded_decks = le_decks.transform(deck_array.ravel()).reshape(deck_array.shape)
-    encoded_winner = le_players.transform(df["winner"])
+    winner_deck_map = df.apply(lambda row: row[row["winner"]], axis=1)
+    le_target_decks = LabelEncoder()
+    le_target_decks.fit(sorted(winner_deck_map.unique()))
+    y_deck = le_target_decks.transform(winner_deck_map)
 
-    return encoded_players, encoded_decks, encoded_winner, le_players, le_decks
+    return x_player, y_player, x_deck, y_deck, le_target_players

@@ -42,6 +42,7 @@ for i in range(combined_features.shape[0]):
     print("-" * 40)
 
 print(f"Meta-model accuracy: {accuracy}")
+print("Meta-model player predictions:", meta_player_name_predictions)
 
 # Step 2: Set up FastAPI
 app = FastAPI()

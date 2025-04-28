@@ -29,15 +29,21 @@ def post_filter_prediction(pred_probs, allowed_labels, label_encoder):
 def train_model(x_player, y_player, le_input_players_input, le_target_players_input, x_deck, y_deck, le_input_decks_input, le_target_decks_input):
     global model_meta, model_player, model_deck, le_input_players, le_target_players, le_input_decks, le_target_decks
 
+    learning_rate = 0.1
+    colsample_bytree = 0.6
+    subsample = 0.6
+    n_estimators = 250
+    max_depth = 2
+
     le_input_players = le_input_players_input
     le_target_players = le_target_players_input
     le_input_decks = le_input_decks_input
     le_target_decks = le_target_decks_input
 
-    model_player = xgb.XGBClassifier(n_estimators=25, max_depth=2, learning_rate=0.01, colsample_bytree=0.6, subsample=0.6)
+    model_player = xgb.XGBClassifier(n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate, colsample_bytree=colsample_bytree, subsample=subsample)
     model_player.fit(x_player, y_player)
 
-    model_deck = xgb.XGBClassifier(n_estimators=25, max_depth=2, learning_rate=0.01, colsample_bytree=0.6, subsample=0.6)
+    model_deck = xgb.XGBClassifier(n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate, colsample_bytree=colsample_bytree, subsample=subsample)
     model_deck.fit(x_deck, y_deck)
 
     deck_probs = model_deck.predict_proba(x_deck)
@@ -55,7 +61,7 @@ def train_model(x_player, y_player, le_input_players_input, le_target_players_in
         player_filtered_preds[i] = post_filter_prediction(player_probs[i], allowed_players, le_target_players)
 
     combined_features = np.vstack((player_filtered_preds, deck_filtered_preds)).T
-    model_meta = xgb.XGBClassifier(n_estimators=25, max_depth=2, learning_rate=0.01, colsample_bytree=0.6, subsample=0.6)
+    model_meta = xgb.XGBClassifier(n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate, colsample_bytree=colsample_bytree, subsample=subsample)
     model_meta.fit(combined_features, y_player)
 
     return model_meta, combined_features

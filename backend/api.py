@@ -6,6 +6,7 @@ from backend.model import train_model, model_predict
 from backend.data_generation import generate_dataset, get_unique_players_and_decks
 from sklearn.metrics import accuracy_score
 from typing import Dict
+import sys
 
 # Step 1: Generate and encode data
 df = generate_dataset()
@@ -13,6 +14,8 @@ df = generate_dataset()
 # Call the function on your dataset
 x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks = encode_data(df)
 model, combined_features = train_model(x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks)
+print("i am the size of things")
+print(sys.getsizeof(model))
 
 meta_predictions = model.predict(combined_features)
 accuracy = accuracy_score(y_player, meta_predictions)

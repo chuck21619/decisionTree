@@ -6,7 +6,6 @@ from backend.model import train_model, model_predict
 from backend.data_generation import generate_dataset, get_unique_players_and_decks
 from sklearn.metrics import accuracy_score
 from typing import Dict
-import sys
 
 # Step 1: Generate and encode data
 df = generate_dataset()
@@ -14,8 +13,6 @@ df = generate_dataset()
 # Call the function on your dataset
 x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks = encode_data(df)
 model, combined_features = train_model(x_player, y_player, le_input_players, le_target_players, x_deck, y_deck, le_input_decks, le_target_decks)
-print("i am the size of things")
-print(sys.getsizeof(model))
 
 meta_predictions = model.predict(combined_features)
 accuracy = accuracy_score(y_player, meta_predictions)
@@ -35,14 +32,14 @@ for i in range(combined_features.shape[0]):
 
     true_winner = le_target_players.inverse_transform([y_player[i]])[0]
 
-    print(f"Row {i}:")
-    print(f"  Input players: {input_players}")
-    print(f"  Input decks: {input_decks}")
-    print(f"  Predicted Player: {decoded_player_pred}")
-    print(f"  Predicted Deck: {decoded_deck_pred}")
-    print(f"      Predicted Meta Player: {meta_player_name_predictions[i]}")
-    print(f"      True winner: {true_winner}")
-    print("-" * 40)
+    # print(f"Row {i}:")
+    # print(f"  Input players: {input_players}")
+    # print(f"  Input decks: {input_decks}")
+    # print(f"  Predicted Player: {decoded_player_pred}")
+    # print(f"  Predicted Deck: {decoded_deck_pred}")
+    # print(f"      Predicted Meta Player: {meta_player_name_predictions[i]}")
+    # print(f"      True winner: {true_winner}")
+    # print("-" * 40)
 
 print(f"Meta-model accuracy: {accuracy}")
 print("Meta-model player predictions:", meta_player_name_predictions)
